@@ -1,0 +1,39 @@
+name: Run REX Agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      cmd_val:
+        description: 'Command or URL'
+        required: true
+      job_id:
+        description: 'Unique Job ID'
+        required: true
+
+jobs:
+  browser-task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps
+
+      - name: Run Agent
+        env:
+          G_DRIVE_CREDS: ${{ secrets.G_DRIVE_CREDS }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+          CMD_VAL: ${{ inputs.cmd_val }}
+          JOB_ID: ${{ inputs.job_id }}
+        run: python agent.py
+
+        
